@@ -263,6 +263,7 @@ if __name__ == "__main__":
     y_train = np_utils.to_categorical(y_train, num_classes=num_classes)
     y_test = np_utils.to_categorical(y_test, num_classes=num_classes)
     
+    
     cnn_params = {
         "learning_rate": 3e-4,
         "num_epochs": 100,
@@ -278,3 +279,4 @@ if __name__ == "__main__":
 
 
     
+# task, implement this entire project in tensorflow version 2. using tutorial videos and docuementation
