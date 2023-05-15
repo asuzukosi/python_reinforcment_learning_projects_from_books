@@ -175,6 +175,8 @@ class FashionMnistClassifier:
         # create training and validation dataset
         train_dataset = self._create_tf_dataset(x_train, y_train)
         valid_dataset = self._create_tf_dataset(x_test, y_test)
+        train_iterator = iter(train_dataset)
+        valid_iterator = iter(valid_dataset)
         
         # create loss object and optimizer
         loss_obj = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
@@ -191,19 +193,16 @@ class FashionMnistClassifier:
         for epoch in range(1, self.num_epochs+1):
             # new epoch starting
             # start training loop
-            logger.info(f"==============>Epoch:{epoch} completed starting")
-            logger.info(f"==============>Epoch:{epoch} training starting")
-            for idx, (x_train, y_train) in enumerate(train_dataset):
-                print("At iteration ", idx)
-                self._train_step(optimizer, loss_obj, x_train, y_train, train_loss, train_acc)
+            x_train, y_train = next(train_iterator)
+            self._train_step(optimizer, loss_obj, x_train, y_train, train_loss, train_acc)
             self._log_loss_and_acc(epoch, train_loss.result(), train_acc.result(), suffix="train")
             logger.info(f"==============>Epoch:{epoch} training ending")
             
             # if epocoh is a multiple of 10 start validation loop
             if epoch % 10 == 0:
                 logger.info(f"==============>Epoch:{epoch} validation starting")
-                for x_test, y_test in valid_dataset:
-                    self._validation_step(x_test, y_test, loss_obj, valid_loss, valid_acc)
+                x_test, y_test = next(valid_iterator)
+                self._validation_step(x_test, y_test, loss_obj, valid_loss, valid_acc)
                 self._log_loss_and_acc(epoch, valid_loss.result(), valid_acc.result(), suffix="validation")
                 logger.info(f"==============>Epoch:{epoch}")    
                 logger.info(f"\tTraining loss: {train_loss.result()}")    
@@ -280,7 +279,7 @@ class ModelBuilder:
     
 if __name__ == '__main__':
     test_params = {"learning_rate": 3e-4,
-                   "num_epochs": 5,
+                   "num_epochs": 100,
                    "dropout": 1e-5,
                    "batch_size": 600,
                    "regularization_factor": 1e-3}
