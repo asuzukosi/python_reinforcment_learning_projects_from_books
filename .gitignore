@@ -156,6 +156,8 @@ cython_debug/
 /saves/
 saves/
 logs/
+/q_tables/
+q_tables/
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore

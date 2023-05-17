@@ -54,6 +54,7 @@ def select_learning_rate(x):
 
 # fix continous state into bucket
 def bucket_state_value(state_value):
+    print("State value: ", state_value)
     bucket_indexes = []
     # in the case of our cart pole problem, this would be 4 because our state is a list with 4 continous values
     for i in range(len(state_value)):
@@ -82,7 +83,7 @@ for episode in range(max_episodes):
     learning_rate = select_exploration_rate(episode)
     
     observation = env.reset()
-    start_state = bucket_state_value(observation)
+    start_state = bucket_state_value(observation[0])
     current_state = start_state
     
     for time in range(max_time_steps):
@@ -104,6 +105,7 @@ for episode in range(max_episodes):
         print('Learning rate : %f' % learning_rate)
         print('Explore rate : %f' % exploration_rate)
         print('Streak number : %d' % no_streaks)
+        print("Terminated: ", terminated)
         
         if terminated:
             print(f"episode reached terminal state after {time} time steps")
@@ -122,3 +124,13 @@ for episode in range(max_episodes):
     
 
 
+env = gym.make("CartPole-v1", render_mode="human")
+for episode in range(10):
+    observation = env.reset()
+    start_state = bucket_state_value(observation[0])
+    current_state = start_state
+    for time in range(200):
+        env.render()
+        selected_action = select_action(current_state, exploration_rate)
+        obs, reward, terminated, truncated, info = env.step(selected_action)
+        current_state = next_state
