@@ -31,6 +31,7 @@ def resize_image(im, resize_shape=(84, 84), methods="crop", crop_offset=8):
     else:
         raise ValueError(f"Unknown image resize method {methods}")
 
+
 def crop_image_to_84_84(observation):
     # perform image scaling here
     observation = resize_image(observation)
@@ -38,7 +39,7 @@ def crop_image_to_84_84(observation):
 
 class ReplayMemory:
     # generalizable replay memory class which can be used to store any type of data
-    def __init__(self, capacity=1000, history_len=4, num_null_operations=4, batch_size=32, transformations=None):
+    def __init__(self, capacity=100000, history_len=4, num_null_operations=4, batch_size=32, transformations=None):
         # specify the transformations that should be done on the state 
         # observation before it is saved to the replay memory
         self.capacity = capacity
@@ -106,14 +107,18 @@ class ReplayMemory:
             
             self.add_null_operations(observation)
         full_state = list(self.states)[-self.history_len + 1:] + [observation] # get the last history - 1 states plus this new observation
-        return np.array(full_state)
+        full_state = np.array(full_state)
+        full_state = np.array(full_state).swapaxes(0,2)
+        return full_state
             
 
     def get_full_state_from_index(self, index):
-        if index >= len(self.states) -2 or index < self.history_len-1:
-            raise ValueError("Index out of range")
+        # print("The number of items in the state is ", len(self.states))
+        # if index > len(self.states) -2 or index < self.history_len-1:
+        #     raise ValueError("Index out of range")
         full_state = list(self.states)[index - self.history_len + 1: index + 1] # get the state sequence starting till index of size history len
-        return np.array(full_state)
+        full_state = np.array(full_state).swapaxes(0,2)
+        return full_state
     
     def _sequence_has_terminal_state(self, index):
         infos = list(self.others)[index - self.history_len + 1: index + 1] # get the state sequence starting till index of size history len
@@ -135,27 +140,3 @@ class ReplayMemory:
         action, reward, terminated = self.others[index]
         
         return (state, action, reward, new_state, terminated)
-        
-    
-memory = ReplayMemory(transformations=[convert_to_grayscale, normalize_image, crop_image_to_84_84])
-
-env =  gym.make("Breakout-v4")
-(observation, info) = env.reset()
-memory.add_null_operations(observation)
-
-for i in range(20):
-    observation = memory.get_full_state_from_observation(observation)
-    
-    print("Observation constructed is of shape: ", observation.shape)
-    action = env.action_space.sample()
-    observation, reward, terminated, truncated, info = env.step(action)
-    memory.add(observation, action, reward, terminated)
-    
-states = memory.states
-print(np.array(states).shape)
-
-state = memory.get_full_state_from_index(10)
-print("Generated state is of shape: ", state.shape)
-
-sampled_state = memory.sample()
-print("Sampled state is of shape: ", sampled_state[0].shape)
