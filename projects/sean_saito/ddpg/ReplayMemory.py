@@ -7,12 +7,11 @@ import random
 
 class ReplayMemory:
     # generalizable replay memory class which can be used to store any type of data
-    def __init__(self, capacity=100000, history_len=4, num_null_operations=4, batch_size=32, transformations=[]):
+    def __init__(self, capacity=100000, history_len=4, num_null_operations=4, transformations=[]):
         # specify the transformations that should be done on the state 
         # observation before it is saved to the replay memory
         self.capacity = capacity
         self.history_len = history_len
-        self.batch_size = batch_size
         self.transformations = transformations
         if num_null_operations  < self.history_len:
             raise ValueError("Number of null operations can not be less than the history length")
@@ -80,9 +79,6 @@ class ReplayMemory:
             
 
     def get_full_state_from_index(self, index):
-        # print("The number of items in the state is ", len(self.states))
-        # if index > len(self.states) -2 or index < self.history_len-1:
-        #     raise ValueError("Index out of range")
         full_state = list(self.states)[index - self.history_len + 1: index + 1] # get the state sequence starting till index of size history len
         return full_state
     
