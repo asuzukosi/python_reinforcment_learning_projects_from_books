@@ -1,6 +1,7 @@
 import logging
 import gym
 import numpy as np
+import tensorflow as tf
 
 from projects.sean_saito.utils import cv2_resize_image
 # import minecraft_py
@@ -91,6 +92,54 @@ class FFPolicy:
         self.n_outputs = n_outputs
         self.network_type = network_type
         self.entropy_beta = 0.01
+        
+        
+    def build_model(self):
+        # create sequential model
+        self.net = tf.keras.models.Sequential()
+        
+        if self.network_type == "cnn":
+            self.net.add(tf.keras.layers.Conv2D(filters=16, 
+                                                kernel_size=(8, 8), 
+                                                strides=(4, 4),
+                                                input_shape=(84, 84, 4), 
+                                                name="conv1"))
+            self.net.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(4, 4), strides=(2, 2), name="conv2"))
+            self.net.add(tf.keras.layers.Flatten())
+            self.net.add(tf.keras.layers.Dense(256, name="fc1"))
+        else:
+            self.net.add(tf.keras.layers.Dense(50, 
+                                               activation="relu", 
+                                               name="fc1"))
+            self.net.add(tf.keras.layers.Dense(50, name="fc2"))
+            
+        self.net.add(tf.keras.layers.Dense(self.n_outputs, name="value"))
+        self.net.add(tf.keras.layers.Softmax(name="policy"))
+        
+        print(self.net.summary())
+        return self.net
+    
+    
+    
+class A3C:
+    def __init__(self, system, directory, param, agent_index=0, callback=None):
+        self.system = system
+        self.actions = system.get_available_actions()
+        self.directory = directory
+        self.callback = callback
+        self.feedback_size = system.get_feedback_size()
+        self.agent_index = agent_index
+        
+        self.set_params(param)
+        self.init_network()
+        
+    def init_network(self):
+        pass
+        
+            
+            
+            
+        
         
         
             
